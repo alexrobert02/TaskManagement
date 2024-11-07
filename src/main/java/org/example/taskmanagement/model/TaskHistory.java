@@ -1,6 +1,8 @@
 package org.example.taskmanagement.model;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -8,27 +10,24 @@ import java.time.LocalDateTime;
 
 @Data
 @Entity
+@Builder
+@AllArgsConstructor
 @NoArgsConstructor
 public class TaskHistory {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String actionType;
-    private String performedBy;
-    private LocalDateTime timestamp;
-
     @ManyToOne
-    @JoinColumn(name = "task_id")
+    @JoinColumn(name = "task_id", nullable = false)
     private Task task;
 
-    public TaskHistory(String actionType, String performedBy, Task task) {
-        this.actionType = actionType;
-        this.performedBy = performedBy;
-        this.task = task;
-        this.timestamp = LocalDateTime.now();
-    }
+    private LocalDateTime changeDate;
 
-    // Getters and Setters
+    private String previousStatus;
+
+    private String newStatus;
+
+    private String updatedBy;
 }
 
