@@ -13,21 +13,16 @@ import java.time.LocalDateTime;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class TaskHistory {
+@Table(name = "comment")
+public class Comment {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "task_id", nullable = false)
-    private Task task;
+    @Column(nullable = false, length = 1000)
+    private String content;
 
-    private LocalDateTime changeDate;
-
-    private String previousStatus;
-
-    private String newStatus;
-
-    private String updatedBy;
+    @Column(nullable = false, updatable = false)
+    private LocalDateTime createdAt = LocalDateTime.now();
 }
-
