@@ -1,16 +1,18 @@
 package org.example.taskmanagement.service;
 
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.example.taskmanagement.dto.TaskCreationRequestDto;
 import org.example.taskmanagement.dto.TaskDto;
 import org.example.taskmanagement.mapper.TaskMapper;
-import org.example.taskmanagement.model.Project;
+import org.example.taskmanagement.model.Priority;
+import org.example.taskmanagement.model.Status;
 import org.example.taskmanagement.model.Task;
-import org.example.taskmanagement.model.User;
 import org.example.taskmanagement.repository.ProjectRepository;
 import org.example.taskmanagement.repository.TaskRepository;
 import org.example.taskmanagement.repository.UserRepository;
 import org.springframework.stereotype.Service;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -26,43 +28,39 @@ public class TaskService {
 
     private final ProjectRepository projectRepository;
 
-    public List<TaskDto> getAllTasks() {
-        return taskRepository.findAll().stream()
-                .map(taskMapper::toTaskDto)
-                .toList();
-    }
-
     public Optional<TaskDto> getTaskById(Long id) {
         return taskRepository.findById(id)
                 .map(taskMapper::toTaskDto);
     }
 
-//    public TaskDto createTask(TaskCreationRequestDto taskCreationRequestDto) {
-//        Task task = taskMapper.toTask(taskCreationRequestDto, userRepository, projectRepository);
-//        userRepository.findById(taskCreationRequestDto.getAssignedUserId())
-//                .ifPresent(task::setAssignedUser);
-//        projectRepository.findById(taskCreationRequestDto.getProjectId())
-//                .ifPresent(task::setProject);
-//        System.out.println("Before saving...");
-//        Task savedTask = taskRepository.save(task);
-//        System.out.println("Task created: " + savedTask);
-//        System.out.println("Mapped task: " + taskMapper.toTaskDto(savedTask));
-//        return taskMapper.toTaskDto(savedTask);
-//    }
+    public TaskDto createTask(TaskCreationRequestDto taskCreationRequestDto) {
+        Task task = taskMapper.toTask(taskCreationRequestDto, userRepository, projectRepository);
+        return taskMapper.toTaskDto(taskRepository.save(task));
+    }
 
-        public Task createTask(TaskCreationRequestDto taskCreationRequestDto) {
-            Task task = taskMapper.toTask(taskCreationRequestDto, userRepository);
-            userRepository.findById(taskCreationRequestDto.getAssignedUserId())
-                    .ifPresent(task::setAssignedUser);
-            Project project = projectRepository.findById(taskCreationRequestDto.getProjectId())
-                    .orElseThrow(() -> new IllegalArgumentException("Project not found"));
-            project.addTask(task);
+    public List<TaskDto> searchTasks(Status status, Priority priority, Long assignedUserId){
+        return taskRepository.searchTasks(status, priority, assignedUserId).stream()
+                .map(taskMapper::toTaskDto)
+                .toList();
+    }
 
-            Task savedTask = taskRepository.save(task);
-            return savedTask;
-        }
+    public List<TaskDto> getTasksWithUpcomingDueDates(Long userId) {
+        return taskRepository.findTasksWithUpcomingDueDates(userId).stream()
+                .map(taskMapper::toTaskDto)
+                .toList();
+    }
+
+    public TaskDto updateTask(Long id, TaskCreationRequestDto taskCreationRequestDto) {
+        return taskRepository.findById(id)
+                .map(task -> {
+                    Task updatedTask = taskMapper.updateTaskFromDto(taskCreationRequestDto, task, userRepository, projectRepository);
+                    return taskMapper.toTaskDto(taskRepository.save(updatedTask));
+                }).orElseThrow(() -> new EntityNotFoundException("Task not found with id: " + id));
+    }
 
     public void deleteTask(Long id) {
         taskRepository.deleteById(id);
     }
+
+
 }

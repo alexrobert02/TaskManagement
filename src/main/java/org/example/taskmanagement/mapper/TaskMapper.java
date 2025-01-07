@@ -7,33 +7,31 @@ import org.example.taskmanagement.model.Task;
 import org.example.taskmanagement.model.User;
 import org.example.taskmanagement.repository.ProjectRepository;
 import org.example.taskmanagement.repository.UserRepository;
-import org.mapstruct.Context;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.Named;
+import org.mapstruct.*;
 
 @Mapper(componentModel = "spring", uses = CommentMapper.class)
 public interface TaskMapper {
 
-    @Mapping(target = "assignedUserId", source = "assignedUser", qualifiedByName = "mapAssignedUserId")
+    @Mapping(target = "projectId", source = "project.id")
     TaskDto toTaskDto(Task task);
 
     @Mapping(target = "assignedUser", source = "assignedUserId", qualifiedByName = "mapAssignedUser")
-    //@Mapping(target = "project", source = "projectId", qualifiedByName = "mapProject")
+    @Mapping(target = "project", source = "projectId", qualifiedByName = "mapProject")
     Task toTask(TaskCreationRequestDto taskCreationRequestDto,
-                @Context UserRepository userRepository);
-                //@Context ProjectRepository projectRepository);
+                @Context UserRepository userRepository,
+                @Context ProjectRepository projectRepository);
+
+    @Mapping(target = "assignedUser", source = "assignedUserId", qualifiedByName = "mapAssignedUser")
+    @Mapping(target = "project", source = "projectId", qualifiedByName = "mapProject")
+    Task updateTaskFromDto(TaskCreationRequestDto dto,
+                           @MappingTarget Task task,
+                           @Context UserRepository userRepository,
+                           @Context ProjectRepository projectRepository);
 
     @Named("mapAssignedUser")
     default User mapAssignedUser(Long assignedUserId, @Context UserRepository userRepository) {
         System.out.println("Mapping user with ID: " + assignedUserId);
         return assignedUserId != null ? userRepository.findById(assignedUserId).orElse(null) : null;
-    }
-
-    @Named("mapAssignedUserId")
-    default Long mapAssignedUserId(User assignedUser) {
-        System.out.println("Mapping user to ID: " + (assignedUser != null ? assignedUser.getId() : null));
-        return assignedUser != null ? assignedUser.getId() : null;
     }
 
     @Named("mapProject")

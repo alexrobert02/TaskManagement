@@ -1,15 +1,16 @@
 package org.example.taskmanagement.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,35 +25,35 @@ public class Task {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    //@NotBlank(message = "Task name is required")
-    //@Size(max = 100, message = "Task name must not exceed 100 characters")
+    @NotBlank(message = "Task name is required")
     private String name;
 
-    //@NotBlank(message = "Description is required")
-    //@Size(max = 500, message = "Description must not exceed 500 characters")
-    private String description;
+    @NotBlank(message = "Required are required")
+    private String details;
 
-    //@NotBlank(message = "Status is required")
-    //@Size(max = 20, message = "Status must not exceed 20 characters")
-    private String status;
+    @NotNull(message = "Status is required")
+    private Status status;
 
-    //@NotBlank(message = "Priority is required")
-    //@Size(max = 20, message = "Priority must not exceed 20 characters")
-    private String priority;
+    @NotNull(message = "Priority is required")
+    private Priority priority;
 
-    //@NotBlank(message = "Deadline is required")
-    private LocalDateTime deadline;
+    @NotNull(message = "Due Date  is required")
+    private LocalDate dueDate;
 
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "task_id")
+    @JsonManagedReference
+    @OneToMany(
+            mappedBy = "task",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true)
     private List<Comment> comments = new ArrayList<>();
 
-    @ManyToOne//(fetch = FetchType.LAZY) // Lazy loading to improve performance
-    @JoinColumn(name = "user_id", nullable = false) // Foreign key column
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
     private User assignedUser;
 
-//    @ManyToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name = "project_id", nullable = false)
-//    @JsonBackReference
-//    private Project project;
+    @JsonBackReference
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "project_id", nullable = false)
+    private Project project;
+
 }

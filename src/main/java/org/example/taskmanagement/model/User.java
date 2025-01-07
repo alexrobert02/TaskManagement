@@ -7,11 +7,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-
 @Data
 @Entity
 @Builder
@@ -25,10 +20,4 @@ public class User {
 
     @NotBlank(message = "Email is required")
     private String email;
-
-    //@OneToMany(mappedBy = "assignedUser", cascade = CascadeType.ALL)
-//    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-//    @JoinColumn(name = "user_id") // Creates the foreign key column in Task
-//    private List<Task> tasks = new ArrayList<>();
-
 }

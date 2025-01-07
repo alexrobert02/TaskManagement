@@ -2,8 +2,13 @@ package org.example.taskmanagement.model;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
-import lombok.*;
+import jakarta.validation.constraints.NotBlank;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.List;
 @Data
 @Entity
@@ -17,12 +22,17 @@ public class Project {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotBlank(message = "Project name is required")
     private String name;
 
+    @NotBlank(message = "Description is required")
     private String description;
 
-    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "project_id")
+    @JsonManagedReference
+    @OneToMany(
+            mappedBy = "project",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true)
     private List<Task> tasks;
 
     @ManyToMany
@@ -31,9 +41,5 @@ public class Project {
             joinColumns = @JoinColumn(name = "project_id"),
             inverseJoinColumns = @JoinColumn(name = "user_id")
     )
-    private List<User> users;
-
-    public void addTask(Task task) {
-        tasks.add(task);
-    }
+    private List<User> users = new ArrayList<>();
 }

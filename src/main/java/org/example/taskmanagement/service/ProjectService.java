@@ -7,6 +7,7 @@ import org.example.taskmanagement.mapper.ProjectMapper;
 import org.example.taskmanagement.model.Project;
 import org.example.taskmanagement.model.User;
 import org.example.taskmanagement.repository.ProjectRepository;
+import org.example.taskmanagement.repository.TaskRepository;
 import org.example.taskmanagement.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
@@ -21,25 +22,33 @@ public class ProjectService {
 
     private final UserRepository userRepository;
 
-    private final ProjectMapper projectMapper;
+    private final TaskRepository taskRepository;
 
-    public List<Project> getAllProjects() {
-        return projectRepository.findAll().stream()
-                //.map(projectMapper::toProjectDto)
-                .toList();
-    }
+    private final ProjectMapper projectMapper;
 
     public Optional<ProjectDto> getProjectById(Long id) {
         return projectRepository.findById(id)
                 .map(projectMapper::toProjectDto);
     }
 
-    public Project createProject(ProjectCreationRequestDto projectCreationRequestDto) {
-        Project project = projectMapper.toProject(projectCreationRequestDto);
-        List<User> users = userRepository.findAllById(projectCreationRequestDto.getUserIds());
-        project.setUsers(users);
-        //return projectMapper.toProjectDto(projectRepository.save(project));
-        return projectRepository.save(project);
+    public ProjectDto createProject(ProjectCreationRequestDto projectCreationRequestDto) {
+        Project project = projectMapper.toProject(projectCreationRequestDto, userRepository, taskRepository);
+        return projectMapper.toProjectDto(projectRepository.save(project));
+    }
+
+    public List<ProjectDto> searchProjects(String name, String description) {
+        return projectRepository.searchProjects(name, description).stream()
+                .map(projectMapper::toProjectDto)
+                .toList();
+    }
+
+    public void assignUsersToProject(Long projectId, List<Long> userIds) {
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new RuntimeException("Project not found"));
+
+        List<User> users = userRepository.findAllById(userIds);
+        project.getUsers().addAll(users);
+        projectRepository.save(project);
     }
 
     public void deleteProject(Long id) {
