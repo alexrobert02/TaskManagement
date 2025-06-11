@@ -8,7 +8,7 @@
 		<version>3.3.5</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
-	<groupId>org.example</groupId>
+	<groupId>com.taskmanagement</groupId>
 	<artifactId>TaskManagement</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>TaskManagement</name>
